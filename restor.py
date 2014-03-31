@@ -2,34 +2,44 @@ import tornado.ioloop
 import tornado.web
 
 class ResTorHandler(tornado.web.RequestHandler):
-    def get(self, *args, _id=None, _new=None, _edit=None, **kwargs):
+    def get(self, *args, _id=None, _arg1=None, _arg2=None, **kwargs):
     	print(self.request.path)
-    	print (_id, _new, _edit)
+    	print (_id, _arg1, _arg2)
 
-    	if not _id and not _new and not _edit:
+    	if not _id and not _arg2 and not _arg1:
     		self.index(*args, **kwargs)
-    	elif _id and not _new and not _edit:
+    	elif _id and not _arg2 and not _arg1:
     		self.show(_id, *args, **kwargs)
-    	elif not _id and not _edit and _new == 'new':
+    	elif not _id and not _arg1 and _arg2 == 'new':
     		self.new(*args, **kwargs)
-    	elif _id and not _new and _edit == 'edit':
+    	elif _id and not _arg2 and _arg1 == 'edit':
     		self.edit(_id, *args, **kwargs)
     	else:
     		raise tornado.web.HTTPError(404)
 
-
-    def post(self, *args, **kwargs):
-    	self.create(*args, **kwargs)
+    def post(self, *args, _id=None, _arg1=None, _arg2=None, **kwargs):
+    	if not _id and not _arg1 and not _arg2:
+    		self.create(*args, **kwargs)
+    	elif _id and not _arg1 and not _arg2:
+    		self.update(_id, *args, **kwargs)
+    	elif _id and not _arg2 and _arg1 == 'delete':
+    		self.destroy(_id, *args, **kwargs)
+    	else:
+    		raise tornado.web.HTTPError(404)
     	
-    def put(self, _id, *args, **kwargs):
-    	if not _id:
+    def put(self, *args, _id=None, _arg1=None, _arg2=None, **kwargs):
+    	if _id and not _arg1 and not _arg2:
+    		self.update(_id, *args, **kwargs)
+    	else:
     		raise tornado.web.HTTPError(404)
-    	self.update(_id, *args, **kwargs)
+    	
 
-    def delete(self, _id, *args, **kwargs):
-    	if not _id:
+    def delete(self, *args, _id=None, _arg1=None, _arg2=None, **kwargs):
+    	if _id and not _arg1 and not _arg2:
+    		self.destroy(_id, *args, **kwargs)
+    	else:
     		raise tornado.web.HTTPError(404)
-    	self.destroy(_id, *args, **kwargs)
+    	
 
     def index(self, *args, **kwargs):
     	print("index")
@@ -64,7 +74,7 @@ class ResTorHandler(tornado.web.RequestHandler):
 
 
 application = tornado.web.Application([
-    (r"/?(?:(?:(?P<_id>[0-9a-f]+)(?:/(?P<_edit>edit))?)|(?P<_new>new))?", ResTorHandler),
+    (r"/?(?:(?:(?P<_id>[0-9a-f]+)(?:/(?P<_arg1>edit|delete))?)|(?P<_arg2>new))?", ResTorHandler),
 ])
 
 if __name__ == "__main__":
