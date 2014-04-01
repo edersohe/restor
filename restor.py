@@ -1,5 +1,7 @@
 import tornado.ioloop
 import tornado.web
+import traceback
+import tornado.httputil
 
 
 def action_routes(prefix, id_regex='[0-9a-f]+'):
@@ -46,7 +48,8 @@ class ActionsHandler(tornado.web.RequestHandler):
             raise tornado.web.HTTPError(404)
 
     def index(self, *args, **kwargs):
-        raise tornado.web.HTTPError(405)
+        self.write("Hola Mundo")
+        # raise tornado.web.HTTPError(405)
 
     def new(self, *args, **kwargs):
         raise tornado.web.HTTPError(405)
@@ -67,9 +70,45 @@ class ActionsHandler(tornado.web.RequestHandler):
         raise tornado.web.HTTPError(405)
 
 
+    def write_error(self, status_code, **kwargs):
+        if "application/json" in self.request.headers.get("Accept", ""):
+            self.set_header('Content-Type', 'application/json')
+            response = {
+                'error': True,
+                'response': None,
+                'code': status_code,
+                'message': self._reason,
+            }
+            if self.settings.get("serve_traceback") and "exc_info" in kwargs:
+                exc_info = traceback.format_exception(*kwargs["exc_info"])
+                response['traceback'] = exc_info
+            self.finish(response)
+        else:
+            super(ActionsHandler, self).write_error(status_code, **kwargs)
+
+
+    def write(self, chunk):
+        status_code = self.get_status()
+        if status_code == 200 and \
+                "application/json" in self.request.headers.get("Accept", ""):
+            self.set_header('Content-Type', 'application/json')
+            status_code = self.get_status()
+            response = {
+                'error': (status_code != 200 or None),
+                'code': status_code,
+                'message': tornado.httputil.responses[status_code], 
+                'response': chunk
+            }
+            super(ActionsHandler, self).write(response)
+        else:
+            super(ActionsHandler, self).write(chunk)
+
+
+
+
 application = tornado.web.Application([
     (action_routes('/animal'), ActionsHandler)
-])
+], debug=True)
 
 
 if __name__ == "__main__":
