@@ -12,9 +12,6 @@ def action_routes(prefix, id_regex='[0-9a-f]+'):
 
 class ActionsHandler(tornado.web.RequestHandler):
     def get(self, *args, _id=None, _arg1=None, _arg2=None, **kwargs):
-        print(self.request.path)
-        print(_id, _arg1, _arg2)
-
         if not _id and not _arg2 and not _arg1:
             self.index(*args, **kwargs)
         elif _id and not _arg2 and not _arg1:
@@ -49,31 +46,24 @@ class ActionsHandler(tornado.web.RequestHandler):
             raise tornado.web.HTTPError(404)
 
     def index(self, *args, **kwargs):
-        print("index")
         raise tornado.web.HTTPError(405)
 
     def new(self, *args, **kwargs):
-        print("new")
         raise tornado.web.HTTPError(405)
 
     def create(self, *args, **kwargs):
-        print("create")
         raise tornado.web.HTTPError(405)
 
     def show(self, _id, *args, **kwargs):
-        print("show", _id)
         raise tornado.web.HTTPError(405)
 
     def edit(self, _id, *args, **kwargs):
-        print("edit", _id)
         raise tornado.web.HTTPError(405)
 
     def update(self, _id, *args, **kwargs):
-        print("update", _id)
         raise tornado.web.HTTPError(405)
 
     def destroy(self, _id, *args, **kwargs):
-        print("destroy", _id)
         raise tornado.web.HTTPError(405)
 
 
