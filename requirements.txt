@@ -1,0 +1,4 @@
+Cython==0.20.1
+motor==0.1.2
+tornado==3.2
+validator.py==0.7.0
