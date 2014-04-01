@@ -1,7 +1,15 @@
 import tornado.ioloop
 import tornado.web
 
-class ResTorHandler(tornado.web.RequestHandler):
+
+def action_routes(prefix, id_regex='[0-9a-f]+'):
+    _id = "(?P<_id>%s)" % id_regex
+    _arg1 =  "(?:/(?P<_arg1>edit|delete))?"
+    _arg2 = "(?P<_arg2>new)"
+    route = "(?:/(?:(?:%s%s)|%s))?" % (_id, _arg1, _arg2)
+    return r'' + prefix + route
+
+class ActionsHandler(tornado.web.RequestHandler):
     def get(self, *args, _id=None, _arg1=None, _arg2=None, **kwargs):
     	print(self.request.path)
     	print (_id, _arg1, _arg2)
@@ -74,7 +82,8 @@ class ResTorHandler(tornado.web.RequestHandler):
 
 
 application = tornado.web.Application([
-    (r"/?(?:(?:(?P<_id>[0-9a-f]+)(?:/(?P<_arg1>edit|delete))?)|(?P<_arg2>new))?", ResTorHandler),
+    (action_routes('/animal'), ActionsHandler)
+    # (r"/?(?:(?:(?P<_id>[0-9a-f]+)(?:/(?P<_arg1>edit|delete))?)|(?P<_arg2>new))?", ResTorHandler),
 ])
 
 if __name__ == "__main__":
