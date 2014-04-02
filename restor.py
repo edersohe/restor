@@ -2,6 +2,7 @@ import tornado.ioloop
 import tornado.web
 import traceback
 import tornado.httputil
+import tornado.escape
 
 
 def action_routes(prefix, id_regex='[0-9a-f]+'):
@@ -48,7 +49,8 @@ class ActionsHandler(tornado.web.RequestHandler):
             raise tornado.web.HTTPError(404)
 
     def index(self, *args, **kwargs):
-        self.write("Hola Mundo")
+        self.write({"hola": ["hola", 1, {"option": True}, True]})
+        # self.write("Hola Mundo", iter=True)
         # raise tornado.web.HTTPError(405)
 
     def new(self, *args, **kwargs):
@@ -72,6 +74,7 @@ class ActionsHandler(tornado.web.RequestHandler):
 
     def write_error(self, status_code, **kwargs):
         if "application/json" in self.request.headers.get("Accept", ""):
+            print("json")
             self.set_header('Content-Type', 'application/json')
             response = {
                 'error': True,
@@ -84,10 +87,11 @@ class ActionsHandler(tornado.web.RequestHandler):
                 response['traceback'] = exc_info
             self.finish(response)
         else:
+            print("hola")
             super(ActionsHandler, self).write_error(status_code, **kwargs)
 
 
-    def write(self, chunk):
+    def write(self, chunk, iter=False):
         status_code = self.get_status()
         if status_code == 200 and \
                 "application/json" in self.request.headers.get("Accept", ""):
@@ -97,9 +101,19 @@ class ActionsHandler(tornado.web.RequestHandler):
                 'error': (status_code != 200 or None),
                 'code': status_code,
                 'message': tornado.httputil.responses[status_code], 
-                'response': chunk
+                # 'response': chunk
             }
-            super(ActionsHandler, self).write(response)
+            if iter:
+                super(ActionsHandler, self).write(tornado.escape.json_encode(response)[:-1]+',"reponse": [')
+                for i in range(len(chunk)): 
+                    if i == 0:
+                        super(ActionsHandler, self).write(tornado.escape.json_encode(chunk[i]))
+                    else:
+                        super(ActionsHandler, self).write(", " + tornado.escape.json_encode(chunk[i]))
+                super(ActionsHandler, self).write("]}")
+            else:
+                response["response"] = chunk
+                super(ActionsHandler, self).write(response)
         else:
             super(ActionsHandler, self).write(chunk)
 
