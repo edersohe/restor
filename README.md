@@ -1,4 +1,4 @@
-## ResTor (Resouce + Tornado)
+## ResTor (Resource + Tornado)
 
 ### Resource Handler based on actions
 
