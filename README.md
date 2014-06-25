@@ -1,4 +1,6 @@
-### Rest Handler based on actions prefix 
+## ResTor (Resouce + Tornado)
+
+### Resource Handler based on actions prefix
 
 | url                 | method | action | html5 | form |
 |:--------------------|:-------|:-------|:-----:|:----:|
