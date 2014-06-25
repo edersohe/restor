@@ -14,7 +14,7 @@
 | {prefix}/:id/delete | POST   | delete | X     |      |
 | {prefix}/:id        | DELETE | delete |       |      |
 
-> {prefix} should be "/animal", "/person", "/job" or any prefix that describe your route 
+> {prefix} should be "/animal", "/person", "/job" or any prefix that describe your resource route
 
 ### Example
 
