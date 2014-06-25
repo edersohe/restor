@@ -3,7 +3,7 @@
 | url                 | method | action | html5 | form |
 |:--------------------|:-------|:-------|:-----:|:----:|
 | {prefix}            | GET    | index  | X     |      |
-| {prefix}/:id        | GET    | show   | X     |      |
+| {prefix}/:id        | GET    | read   | X     |      |
 | {prefix}/:id/edit   | GET    | edit   | X     | X    |
 | {prefix}/new        | GET    | new    | X     | X    |
 | {prefix}            | POST   | create | X     |      |
@@ -28,7 +28,7 @@ class MyActions(restor.ActionsHandler):
     def create(self):
         self.write("CREATE")
 
-    def show(self, _id):
+    def read(self, _id):
         self.write("SHOW " + _id)
 
     def update(self, _id):
@@ -47,6 +47,6 @@ if __name__ == "__main__":
 
 * http://localhost:8888/example method GET  execute index action
 * http://localhost:8888/example method POST execute create action
-* http://localhost:8888/example/123 method GET execute show action with id 123
+* http://localhost:8888/example/123 method GET execute read action with id 123
 * http://localhost:8888/example/123 method UPDATE execute update action with id 123
 * http://localhost:8888/example/123 method POST execute update action with id 123

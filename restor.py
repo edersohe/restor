@@ -13,12 +13,12 @@ def action_routes(prefix, id_regex='[0-9a-f]+'):
     return r'' + prefix + route
 
 
-class ActionsHandler(tornado.web.RequestHandler):
+class ResourceHandler(tornado.web.RequestHandler):
     def get(self, *args, _id=None, _arg1=None, _arg2=None, **kwargs):
         if not _id and not _arg2 and not _arg1:
             self.index(*args, **kwargs)
         elif _id and not _arg2 and not _arg1:
-            self.show(_id, *args, **kwargs)
+            self.read(_id, *args, **kwargs)
         elif not _id and not _arg1 and _arg2 == 'new':
             self.new(*args, **kwargs)
         elif _id and not _arg2 and _arg1 == 'edit':
@@ -59,7 +59,7 @@ class ActionsHandler(tornado.web.RequestHandler):
     def create(self, *args, **kwargs):
         raise tornado.web.HTTPError(405)
 
-    def show(self, _id, *args, **kwargs):
+    def read(self, _id, *args, **kwargs):
         raise tornado.web.HTTPError(405)
 
     def edit(self, _id, *args, **kwargs):
@@ -74,24 +74,22 @@ class ActionsHandler(tornado.web.RequestHandler):
 
     def write_error(self, status_code, **kwargs):
         if "application/json" in self.request.headers.get("Accept", ""):
-            print("json")
             self.set_header('Content-Type', 'application/json')
             response = {
                 'error': True,
                 'response': None,
                 'code': status_code,
-                'message': self._reason,
+                'status': self._reason,
             }
             if self.settings.get("serve_traceback") and "exc_info" in kwargs:
                 exc_info = traceback.format_exception(*kwargs["exc_info"])
-                response['traceback'] = exc_info
+                response['debug'] = exc_info
             self.finish(response)
         else:
-            print("hola")
-            super(ActionsHandler, self).write_error(status_code, **kwargs)
+            super(ResourceHandler, self).write_error(status_code, **kwargs)
 
 
-    def write(self, chunk, iter=False):
+    def write(self, chunk):
         status_code = self.get_status()
         if status_code == 200 and \
                 "application/json" in self.request.headers.get("Accept", ""):
@@ -100,28 +98,25 @@ class ActionsHandler(tornado.web.RequestHandler):
             response = {
                 'error': (status_code != 200 or None),
                 'code': status_code,
-                'message': tornado.httputil.responses[status_code], 
-                # 'response': chunk
+                'status': tornado.httputil.responses[status_code],
             }
-            if iter:
-                super(ActionsHandler, self).write(tornado.escape.json_encode(response)[:-1]+',"reponse": [')
+            if isinstance(chunk, (list,tuple)) and not isinstance(chunk, basestring):
+                super(ResourceHandler, self).write(tornado.escape.json_encode(response)[:-1]+',"reponse": [')
                 for i in range(len(chunk)): 
-                    if i == 0:
-                        super(ActionsHandler, self).write(tornado.escape.json_encode(chunk[i]))
+                    if i > 0:
+                        super(ResourceHandler, self).write(", " + tornado.escape.json_encode(chunk[i]))
                     else:
-                        super(ActionsHandler, self).write(", " + tornado.escape.json_encode(chunk[i]))
-                super(ActionsHandler, self).write("]}")
+                        super(ResourceHandler, self).write(tornado.escape.json_encode(chunk[i]))
+                super(ResourceHandler, self).write("]}")
             else:
                 response["response"] = chunk
-                super(ActionsHandler, self).write(response)
+                super(ResourceHandler, self).write(response)
         else:
-            super(ActionsHandler, self).write(chunk)
-
-
+            super(ResourceHandler, self).write(chunk)
 
 
 application = tornado.web.Application([
-    (action_routes('/animal'), ActionsHandler)
+    (action_routes('/animal'), ResourceHandler)
 ], debug=True)
 
 
