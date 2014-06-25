@@ -20,7 +20,7 @@
 import restor
 import tornado.web
 
-class MyActions(restor.ActionsHandler):
+class MyActions(restor.ResourceHandler):
 
     def index(self):
         self.write("INDEX")
