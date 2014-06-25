@@ -1,6 +1,6 @@
 ## ResTor (Resouce + Tornado)
 
-### Resource Handler based on actions prefix
+### Resource Handler based on actions
 
 | url                 | method | action | html5 | form |
 |:--------------------|:-------|:-------|:-----:|:----:|
